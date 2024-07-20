@@ -1,13 +1,14 @@
-// const express = require("express");
 import express from "express";
-// const path = require("path");
 import path from "path";
-const app = express();
-// const posts = require("./routes/posts.js");
+import { fileURLToPath } from "url";
+
+// imports the router function from posts.js
 import posts from "./routes/posts.js";
-const port = process.env.PORT || 8000;
 // logger
 import logger from "./middleware/logger.js";
+// error handler
+import errorHandler from "./middleware/error.js";
+import notFound from "./middleware/notFound.js";
 
 // BASIC SENDING
 // app.get("/", (req, res) => {
@@ -22,15 +23,28 @@ import logger from "./middleware/logger.js";
 // SENDING THRU EX: LOCALHOST:8000/ABOUT.HTML
 // app.use(express.static(path.join(__dirname, "public")));
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+console.log(__filename);
+const port = process.env.PORT || 8000;
+const app = express();
+
 // body parser middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+
+// static folder
+app.use(express.static(path.join(__dirname, "public")));
 
 // use logger
 app.use(logger);
 
 // Routes;
 app.use("/api/posts", posts);
+
+// use error handler
+app.use(notFound);
+app.use(errorHandler);
 
 app.listen(port, () => {
   console.log(`server is running on Port:${port}`);
